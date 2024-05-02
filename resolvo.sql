@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 27-04-2024 a las 20:19:04
+-- Tiempo de generación: 02-05-2024 a las 16:25:00
 -- Versión del servidor: 10.4.25-MariaDB
 -- Versión de PHP: 8.1.10
 
@@ -41,6 +41,13 @@ CREATE TABLE `cliente` (
   `contrato` enum('noTiene','limitado','ilimitado') NOT NULL DEFAULT 'noTiene'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Volcado de datos para la tabla `cliente`
+--
+
+INSERT INTO `cliente` (`idCliente`, `nombre`, `apellidos`, `calle`, `codPostal`, `ciudad`, `provincia`, `telefono`, `dni`, `email`, `contrato`) VALUES
+(1, 'Marcos', 'Merino', '', '', '', '', '', '', '', 'noTiene');
+
 -- --------------------------------------------------------
 
 --
@@ -69,7 +76,7 @@ CREATE TABLE `incidencia` (
 --
 
 CREATE TABLE `media` (
-  `idMedia` int(11) DEFAULT NULL,
+  `idMedia` int(11) NOT NULL,
   `idIncidencia` int(11) DEFAULT NULL,
   `data` longblob DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -81,9 +88,9 @@ CREATE TABLE `media` (
 --
 
 CREATE TABLE `presupuesto` (
-  `idPresupuesto` int(11) DEFAULT NULL,
+  `idPresupuesto` int(11) NOT NULL,
   `idIncidencia` int(11) DEFAULT NULL,
-  `idCliente` int(10) UNSIGNED DEFAULT NULL,
+  `idCliente` int(11) UNSIGNED DEFAULT NULL,
   `descripcion` varchar(255) DEFAULT NULL,
   `coste` decimal(20,6) DEFAULT NULL,
   `aceptado` tinyint(1) DEFAULT NULL
@@ -96,7 +103,7 @@ CREATE TABLE `presupuesto` (
 --
 
 CREATE TABLE `trabajador` (
-  `idTrabajador` int(10) UNSIGNED NOT NULL,
+  `idTrabajador` int(11) UNSIGNED NOT NULL,
   `nombre` varchar(50) DEFAULT NULL,
   `apellidos` varchar(50) DEFAULT NULL,
   `calle` varchar(50) DEFAULT NULL,
@@ -111,6 +118,14 @@ CREATE TABLE `trabajador` (
   `especializacion` enum('movil','pc','portailes','electrodomesticos','otro') DEFAULT 'otro'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Volcado de datos para la tabla `trabajador`
+--
+
+INSERT INTO `trabajador` (`idTrabajador`, `nombre`, `apellidos`, `calle`, `codPostal`, `ciudad`, `provincia`, `telefono`, `dni`, `email`, `fechaNacimiento`, `cargo`, `especializacion`) VALUES
+(1, 'Tobias', 'Martinez Hernandez', 'Periquito', '25841', 'Madrid', 'Madrid', '458521320', '45125875D', 'tobias@resolvo.com', '1984-05-06', 'tecnico', 'movil'),
+(2, 'Gloria', 'Fernandez del Bosque', 'La Amargura', '78451', 'Leganes', 'Madrid', '526987545', '45236025A', 'Gloria@resolvo.com', '1982-01-20', 'tecnico', 'electrodomesticos');
+
 -- --------------------------------------------------------
 
 --
@@ -118,8 +133,8 @@ CREATE TABLE `trabajador` (
 --
 
 CREATE TABLE `usuarioexterno` (
-  `idUsuarioExterno` int(11) DEFAULT NULL,
-  `idCliente` int(10) UNSIGNED DEFAULT NULL,
+  `idUsuarioExterno` int(11) NOT NULL,
+  `idCliente` int(11) UNSIGNED DEFAULT NULL,
   `usuario` varchar(50) DEFAULT NULL,
   `material` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -131,7 +146,7 @@ CREATE TABLE `usuarioexterno` (
 --
 
 CREATE TABLE `usuariointerno` (
-  `idUsuario` int(11) DEFAULT NULL,
+  `idUsuario` int(11) NOT NULL,
   `idTrabajador` int(11) UNSIGNED DEFAULT NULL,
   `usuario` varchar(50) DEFAULT NULL,
   `material` varchar(255) DEFAULT NULL
@@ -160,14 +175,16 @@ ALTER TABLE `incidencia`
 -- Indices de la tabla `media`
 --
 ALTER TABLE `media`
+  ADD PRIMARY KEY (`idMedia`),
   ADD KEY `FK_media_incidencia` (`idIncidencia`);
 
 --
 -- Indices de la tabla `presupuesto`
 --
 ALTER TABLE `presupuesto`
-  ADD KEY `FK_presupuesto_incidencia` (`idIncidencia`),
-  ADD KEY `FK_presupuesto_cliente` (`idCliente`);
+  ADD PRIMARY KEY (`idPresupuesto`),
+  ADD KEY `FK_presupuesto_cliente` (`idCliente`),
+  ADD KEY `FK_presupuesto_incidencia` (`idIncidencia`);
 
 --
 -- Indices de la tabla `trabajador`
@@ -180,12 +197,14 @@ ALTER TABLE `trabajador`
 -- Indices de la tabla `usuarioexterno`
 --
 ALTER TABLE `usuarioexterno`
+  ADD PRIMARY KEY (`idUsuarioExterno`),
   ADD KEY `FK_usuarioexterno_cliente` (`idCliente`);
 
 --
 -- Indices de la tabla `usuariointerno`
 --
 ALTER TABLE `usuariointerno`
+  ADD PRIMARY KEY (`idUsuario`),
   ADD KEY `FK_usuariointerno_trabajador` (`idTrabajador`);
 
 --
@@ -196,7 +215,43 @@ ALTER TABLE `usuariointerno`
 -- AUTO_INCREMENT de la tabla `cliente`
 --
 ALTER TABLE `cliente`
-  MODIFY `idCliente` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `idCliente` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT de la tabla `incidencia`
+--
+ALTER TABLE `incidencia`
+  MODIFY `idIncidencia` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `media`
+--
+ALTER TABLE `media`
+  MODIFY `idMedia` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `presupuesto`
+--
+ALTER TABLE `presupuesto`
+  MODIFY `idPresupuesto` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `trabajador`
+--
+ALTER TABLE `trabajador`
+  MODIFY `idTrabajador` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `usuarioexterno`
+--
+ALTER TABLE `usuarioexterno`
+  MODIFY `idUsuarioExterno` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `usuariointerno`
+--
+ALTER TABLE `usuariointerno`
+  MODIFY `idUsuario` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Restricciones para tablas volcadas
