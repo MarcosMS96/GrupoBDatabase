@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 03-05-2024 a las 09:11:40
+-- Tiempo de generación: 03-05-2024 a las 12:10:48
 -- Versión del servidor: 10.4.25-MariaDB
 -- Versión de PHP: 8.1.10
 
@@ -38,15 +38,36 @@ CREATE TABLE `cliente` (
   `telefono` varchar(9) NOT NULL,
   `dni` varchar(9) NOT NULL,
   `email` varchar(50) NOT NULL,
-  `contrato` enum('noTiene','limitado','ilimitado') NOT NULL DEFAULT 'noTiene'
+  `contrato` enum('noTiene','limitado','ilimitado') NOT NULL DEFAULT 'noTiene',
+  `numIncidencias` int(10) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `cliente`
 --
 
-INSERT INTO `cliente` (`idCliente`, `nombre`, `apellidos`, `calle`, `codPostal`, `ciudad`, `provincia`, `telefono`, `dni`, `email`, `contrato`) VALUES
-(8, 'Laura', 'Jimenez Margó', 'Luna de Cristal', '25841', 'Madrid', 'Madrid', '547852145', '45125875D', 'lauritajiji@gmail.com', 'noTiene');
+INSERT INTO `cliente` (`idCliente`, `nombre`, `apellidos`, `calle`, `codPostal`, `ciudad`, `provincia`, `telefono`, `dni`, `email`, `contrato`, `numIncidencias`) VALUES
+(8, 'Laura', 'Jimenez Margó', 'Luna de Cristal', '25841', 'Madrid', 'Madrid', '547852145', '45125875D', 'lauritajiji@gmail.com', 'noTiene', NULL),
+(9, 'Kiko', 'Martinez Florin', 'Herrero', '458745', 'Madrid', 'Madrid', '58952103', '58745215P', 'Kiko@gmail.com', 'noTiene', 0),
+(10, 'Pedro', 'Martinez Florin', 'Herrero', '458745', 'Madrid', 'Madrid', '859632145', '58745214P', 'Pedro@gmail.com', 'limitado', 10),
+(11, 'Turen', 'MasterMind', 'Álcantara', '85126', 'Sevilla', 'Andalucia', '875412026', '85478514A', 'Turen@gmail.com', 'ilimitado', 1000000);
+
+--
+-- Disparadores `cliente`
+--
+DELIMITER $$
+CREATE TRIGGER `cliente_before_insert` BEFORE INSERT ON `cliente` FOR EACH ROW BEGIN
+	CASE 
+		WHEN NEW.contrato LIKE "noTiene" THEN
+		 SET NEW.numIncidencias=0;
+		WHEN NEW.contrato LIKE "limitado" THEN 
+			SET NEW.numIncidencias=10;
+		WHEN NEW.contrato LIKE "ilimitado" THEN 
+			SET NEW.numIncidencias=1000000;
+	END CASE;	
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -124,26 +145,28 @@ CREATE TABLE `trabajador` (
 
 INSERT INTO `trabajador` (`idTrabajador`, `nombre`, `apellidos`, `calle`, `codPostal`, `ciudad`, `provincia`, `telefono`, `dni`, `email`, `fechaNacimiento`, `cargo`, `especializacion`) VALUES
 (6, 'Tobias', 'Martinez Hernandez', 'La Amargura', '25841', 'Madrid', 'Madrid', '589654521', '45125875D', 'tobias.martinez.hernandez@resolvo.com', '1984-05-06', 'administrador', 'movil'),
-(7, 'Tobias', 'Martinez Hernandez', 'Periquito', '14524', 'Leon', 'Castilla y Leon', '152001208', '02302569I', 'tobias.martinez hernandez1@resolvo.com', '2004-04-01', 'tecnico', 'otro'),
-(8, 'Tobias', 'Martinez Hernandez', 'Periquito', '14524', 'Leon', 'Castilla y Leon', '152001208', '02302569I', 'tobias.martinez hernandez2@resolvo.com', '2004-04-01', 'tecnico', 'otro');
+(9, 'Tobias', 'Martinez Hernandez', 'La Amargura', '25841', 'Madrid', 'Madrid', '589654521', '45125875D', 'tobias.martinez.hernandez1@resolvo.com', '1984-05-06', 'administrador', 'movil'),
+(10, 'Tobias', 'Martinez Hernandez', 'La Amargura', '25841', 'Madrid', 'Madrid', '589654521', '45125875D', 'tobias.martinez.hernandez2@resolvo.com', '1984-05-06', 'administrador', 'movil'),
+(11, 'Tobias', 'Martinez Hernandez', 'La Amargura', '25841', 'Madrid', 'Madrid', '589654521', '45125875D', 'tobias.martinez.hernandez3@resolvo.com', '1984-05-06', 'administrador', 'movil'),
+(13, 'Tobias', 'Martinez Hernandez', 'La Amargura', '25841', 'Madrid', 'Madrid', '589654521', '45125875D', 'tobias.martinez.hernandez4@resolvo.com', '1984-05-06', 'administrador', 'movil');
 
 --
 -- Disparadores `trabajador`
 --
 DELIMITER $$
-CREATE TRIGGER `trabajador_after_update` AFTER UPDATE ON `trabajador` FOR EACH ROW BEGIN
-	IF OLD.email != NEW.email THEN
-		UPDATE usuariointerno SET email= NEW.email WHERE idTrabajador= OLD.idTrabajador;
-	END IF;
+CREATE TRIGGER `trabajador_after_insert` AFTER INSERT ON `trabajador` FOR EACH ROW BEGIN
+	DECLARE random_password VARCHAR(255);
+  	SET random_password = MD5(RAND());
+  	INSERT INTO usuariointerno(`idTrabajador`, `email`, `material`) 
+  	VALUES(NEW.idTrabajador, NEW.email, random_password);
 END
 $$
 DELIMITER ;
 DELIMITER $$
-CREATE TRIGGER `trabajador_before_insert` AFTER INSERT ON `trabajador` FOR EACH ROW BEGIN
-	DECLARE random_password VARCHAR(255);
-  	SET random_password = MD5(RAND()); 
-  	INSERT INTO usuariointerno(`idTrabajador`, `email`, `material`) 
-  	VALUES(NEW.idTrabajador, NEW.email, random_password);
+CREATE TRIGGER `trabajador_after_update` AFTER UPDATE ON `trabajador` FOR EACH ROW BEGIN
+	IF OLD.email != NEW.email THEN
+		UPDATE usuariointerno SET email= NEW.email WHERE idTrabajador= OLD.idTrabajador;
+	END IF;
 END
 $$
 DELIMITER ;
@@ -168,7 +191,7 @@ CREATE TRIGGER `trabajador_before_insert_email` BEFORE INSERT ON `trabajador` FO
   )DO
 	    	SET contador_emails = contador_emails + 1;
 	    	SET NEW.email = CONCAT(
-	    	  LOWER(NEW.nombre), '.', LOWER(NEW.apellidos), contador_emails, dominio_correo
+	    	  LOWER(NEW.nombre), '.', LOWER(REPLACE(NEW.apellidos, ' ', '.')), contador_emails, dominio_correo
 	   	 );
   END WHILE;
 END
@@ -214,9 +237,11 @@ CREATE TABLE `usuariointerno` (
 --
 
 INSERT INTO `usuariointerno` (`idUsuarioInterno`, `idTrabajador`, `email`, `material`, `primeraVez`) VALUES
-(6, 6, 'tobias.martinez.hernandez@resolvo.com', '27b1ad08bfb2c6988d79d2e61a1d144a', 1),
-(7, 7, 'tobias.martinez hernandez1@resolvo.com', 'fa3eb10e9fb05dbb97d3e680bd3d44ea', 1),
-(8, 8, 'tobias.martinez hernandez2@resolvo.com', 'd4557ddd8c18926115359dae39f0f583', 1);
+(6, 6, 'tobias.martinez.hernandez@resolvo.com', '1234', 1),
+(9, 9, 'tobias.martinez.hernandez1@resolvo.com', '336ccbafd2ec31d0adb0c8284db3f6c1', 1),
+(10, 10, 'tobias.martinez.hernandez2@resolvo.com', 'ffee965ad7f3513475fc1295e499ab4d', 1),
+(11, 11, 'tobias.martinez.hernandez3@resolvo.com', '92844a53b7ba592897d8c29315e4a3e7', 1),
+(12, 13, 'tobias.martinez.hernandez4@resolvo.com', '5bbdd0d2d09fe0ea61537a7848eceb4e', 1);
 
 --
 -- Índices para tablas volcadas
@@ -283,7 +308,7 @@ ALTER TABLE `usuariointerno`
 -- AUTO_INCREMENT de la tabla `cliente`
 --
 ALTER TABLE `cliente`
-  MODIFY `idCliente` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `idCliente` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de la tabla `incidencia`
@@ -307,7 +332,7 @@ ALTER TABLE `presupuesto`
 -- AUTO_INCREMENT de la tabla `trabajador`
 --
 ALTER TABLE `trabajador`
-  MODIFY `idTrabajador` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `idTrabajador` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarioexterno`
@@ -319,7 +344,7 @@ ALTER TABLE `usuarioexterno`
 -- AUTO_INCREMENT de la tabla `usuariointerno`
 --
 ALTER TABLE `usuariointerno`
-  MODIFY `idUsuarioInterno` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `idUsuarioInterno` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- Restricciones para tablas volcadas
