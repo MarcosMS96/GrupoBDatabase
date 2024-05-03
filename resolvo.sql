@@ -168,7 +168,7 @@ CREATE TRIGGER `trabajador_before_insert_email` BEFORE INSERT ON `trabajador` FO
   )DO
 	    	SET contador_emails = contador_emails + 1;
 	    	SET NEW.email = CONCAT(
-	    	  LOWER(NEW.nombre), '.', LOWER(NEW.apellidos), '', contador_emails, dominio_correo
+	    	  LOWER(NEW.nombre), '.', LOWER(NEW.apellidos), contador_emails, dominio_correo
 	   	 );
   END WHILE;
 END
