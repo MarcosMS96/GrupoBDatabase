@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 02-05-2024 a las 16:25:00
+-- Tiempo de generación: 03-05-2024 a las 09:11:40
 -- Versión del servidor: 10.4.25-MariaDB
 -- Versión de PHP: 8.1.10
 
@@ -46,7 +46,7 @@ CREATE TABLE `cliente` (
 --
 
 INSERT INTO `cliente` (`idCliente`, `nombre`, `apellidos`, `calle`, `codPostal`, `ciudad`, `provincia`, `telefono`, `dni`, `email`, `contrato`) VALUES
-(1, 'Marcos', 'Merino', '', '', '', '', '', '', '', 'noTiene');
+(8, 'Laura', 'Jimenez Margó', 'Luna de Cristal', '25841', 'Madrid', 'Madrid', '547852145', '45125875D', 'lauritajiji@gmail.com', 'noTiene');
 
 -- --------------------------------------------------------
 
@@ -123,8 +123,57 @@ CREATE TABLE `trabajador` (
 --
 
 INSERT INTO `trabajador` (`idTrabajador`, `nombre`, `apellidos`, `calle`, `codPostal`, `ciudad`, `provincia`, `telefono`, `dni`, `email`, `fechaNacimiento`, `cargo`, `especializacion`) VALUES
-(1, 'Tobias', 'Martinez Hernandez', 'Periquito', '25841', 'Madrid', 'Madrid', '458521320', '45125875D', 'tobias@resolvo.com', '1984-05-06', 'tecnico', 'movil'),
-(2, 'Gloria', 'Fernandez del Bosque', 'La Amargura', '78451', 'Leganes', 'Madrid', '526987545', '45236025A', 'Gloria@resolvo.com', '1982-01-20', 'tecnico', 'electrodomesticos');
+(6, 'Tobias', 'Martinez Hernandez', 'La Amargura', '25841', 'Madrid', 'Madrid', '589654521', '45125875D', 'tobias.martinez.hernandez@resolvo.com', '1984-05-06', 'administrador', 'movil'),
+(7, 'Tobias', 'Martinez Hernandez', 'Periquito', '14524', 'Leon', 'Castilla y Leon', '152001208', '02302569I', 'tobias.martinez hernandez1@resolvo.com', '2004-04-01', 'tecnico', 'otro'),
+(8, 'Tobias', 'Martinez Hernandez', 'Periquito', '14524', 'Leon', 'Castilla y Leon', '152001208', '02302569I', 'tobias.martinez hernandez2@resolvo.com', '2004-04-01', 'tecnico', 'otro');
+
+--
+-- Disparadores `trabajador`
+--
+DELIMITER $$
+CREATE TRIGGER `trabajador_after_update` AFTER UPDATE ON `trabajador` FOR EACH ROW BEGIN
+	IF OLD.email != NEW.email THEN
+		UPDATE usuariointerno SET email= NEW.email WHERE idTrabajador= OLD.idTrabajador;
+	END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `trabajador_before_insert` AFTER INSERT ON `trabajador` FOR EACH ROW BEGIN
+	DECLARE random_password VARCHAR(255);
+  	SET random_password = MD5(RAND()); 
+  	INSERT INTO usuariointerno(`idTrabajador`, `email`, `material`) 
+  	VALUES(NEW.idTrabajador, NEW.email, random_password);
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `trabajador_before_insert_email` BEFORE INSERT ON `trabajador` FOR EACH ROW BEGIN
+  DECLARE dominio_correo VARCHAR(50);
+  DECLARE contador_emails INT;
+
+
+  SET dominio_correo = '@resolvo.com';
+
+  SET contador_emails = 0;
+
+	SET NEW.email = CONCAT(
+      LOWER(NEW.nombre), '.', LOWER(REPLACE(NEW.apellidos, ' ', '.')), dominio_correo);
+
+
+  WHILE EXISTS(
+    SELECT 1
+    FROM `trabajador`
+    WHERE `email`= NEW.email
+  )DO
+	    	SET contador_emails = contador_emails + 1;
+	    	SET NEW.email = CONCAT(
+	    	  LOWER(NEW.nombre), '.', LOWER(NEW.apellidos), '', contador_emails, dominio_correo
+	   	 );
+  END WHILE;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -135,9 +184,16 @@ INSERT INTO `trabajador` (`idTrabajador`, `nombre`, `apellidos`, `calle`, `codPo
 CREATE TABLE `usuarioexterno` (
   `idUsuarioExterno` int(11) NOT NULL,
   `idCliente` int(11) UNSIGNED DEFAULT NULL,
-  `usuario` varchar(50) DEFAULT NULL,
+  `email` varchar(50) DEFAULT NULL,
   `material` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `usuarioexterno`
+--
+
+INSERT INTO `usuarioexterno` (`idUsuarioExterno`, `idCliente`, `email`, `material`) VALUES
+(8, 8, 'lauritajiji@gmail.com', 'Cliente123');
 
 -- --------------------------------------------------------
 
@@ -146,11 +202,21 @@ CREATE TABLE `usuarioexterno` (
 --
 
 CREATE TABLE `usuariointerno` (
-  `idUsuario` int(11) NOT NULL,
+  `idUsuarioInterno` int(11) NOT NULL,
   `idTrabajador` int(11) UNSIGNED DEFAULT NULL,
-  `usuario` varchar(50) DEFAULT NULL,
-  `material` varchar(255) DEFAULT NULL
+  `email` varchar(50) DEFAULT NULL,
+  `material` varchar(255) DEFAULT NULL,
+  `primeraVez` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `usuariointerno`
+--
+
+INSERT INTO `usuariointerno` (`idUsuarioInterno`, `idTrabajador`, `email`, `material`, `primeraVez`) VALUES
+(6, 6, 'tobias.martinez.hernandez@resolvo.com', '27b1ad08bfb2c6988d79d2e61a1d144a', 1),
+(7, 7, 'tobias.martinez hernandez1@resolvo.com', 'fa3eb10e9fb05dbb97d3e680bd3d44ea', 1),
+(8, 8, 'tobias.martinez hernandez2@resolvo.com', 'd4557ddd8c18926115359dae39f0f583', 1);
 
 --
 -- Índices para tablas volcadas
@@ -198,14 +264,16 @@ ALTER TABLE `trabajador`
 --
 ALTER TABLE `usuarioexterno`
   ADD PRIMARY KEY (`idUsuarioExterno`),
-  ADD KEY `FK_usuarioexterno_cliente` (`idCliente`);
+  ADD KEY `FK_usuarioexterno_cliente_ID` (`idCliente`),
+  ADD KEY `FK_usuarioexterno_cliente_email` (`email`);
 
 --
 -- Indices de la tabla `usuariointerno`
 --
 ALTER TABLE `usuariointerno`
-  ADD PRIMARY KEY (`idUsuario`),
-  ADD KEY `FK_usuariointerno_trabajador` (`idTrabajador`);
+  ADD PRIMARY KEY (`idUsuarioInterno`),
+  ADD KEY `FK_usuariointerno_trabajador_Id` (`idTrabajador`),
+  ADD KEY `FK_usuariointerno_trabajador_email` (`email`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -215,7 +283,7 @@ ALTER TABLE `usuariointerno`
 -- AUTO_INCREMENT de la tabla `cliente`
 --
 ALTER TABLE `cliente`
-  MODIFY `idCliente` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `idCliente` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `incidencia`
@@ -239,19 +307,19 @@ ALTER TABLE `presupuesto`
 -- AUTO_INCREMENT de la tabla `trabajador`
 --
 ALTER TABLE `trabajador`
-  MODIFY `idTrabajador` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `idTrabajador` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarioexterno`
 --
 ALTER TABLE `usuarioexterno`
-  MODIFY `idUsuarioExterno` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `idUsuarioExterno` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `usuariointerno`
 --
 ALTER TABLE `usuariointerno`
-  MODIFY `idUsuario` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `idUsuarioInterno` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- Restricciones para tablas volcadas
@@ -281,13 +349,15 @@ ALTER TABLE `presupuesto`
 -- Filtros para la tabla `usuarioexterno`
 --
 ALTER TABLE `usuarioexterno`
-  ADD CONSTRAINT `FK_usuarioexterno_cliente` FOREIGN KEY (`idCliente`) REFERENCES `cliente` (`idCliente`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT `FK_usuarioexterno_cliente_ID` FOREIGN KEY (`idCliente`) REFERENCES `cliente` (`idCliente`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `FK_usuarioexterno_cliente_email` FOREIGN KEY (`email`) REFERENCES `cliente` (`email`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Filtros para la tabla `usuariointerno`
 --
 ALTER TABLE `usuariointerno`
-  ADD CONSTRAINT `FK_usuariointerno_trabajador` FOREIGN KEY (`idTrabajador`) REFERENCES `trabajador` (`idTrabajador`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT `FK_usuariointerno_trabajador_Id` FOREIGN KEY (`idTrabajador`) REFERENCES `trabajador` (`idTrabajador`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `FK_usuariointerno_trabajador_email` FOREIGN KEY (`email`) REFERENCES `trabajador` (`email`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
