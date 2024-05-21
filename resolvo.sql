@@ -36,7 +36,7 @@ END$$
 
 DELIMITER ;
 --
---Activar eventos
+-- Activar eventos
 --
 SET GLOBAL event_scheduler = ON;
 -- --------------------------------------------------------
