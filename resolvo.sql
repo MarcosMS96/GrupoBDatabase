@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 21-05-2024 a las 19:21:02
+-- Tiempo de generación: 21-05-2024 a las 19:43:35
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -35,7 +35,10 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `sha256` (`input_string` VARCHAR(255)
 END$$
 
 DELIMITER ;
-
+--
+--Activar eventos
+--
+SET GLOBAL event_scheduler = ON;
 -- --------------------------------------------------------
 
 --
@@ -150,6 +153,7 @@ CREATE TABLE `incidencia` (
 --
 
 INSERT INTO `incidencia` (`idIncidencia`, `idCliente`, `idTrabajador`, `dispositivo`, `marca`, `modelo`, `ubicacion`, `motivo`, `fechaAltaIncidencia`, `estado`, `informeTecnico`, `fechaCierreIncidencia`, `firmaDigital`) VALUES
+(1, 9, 10, 'Teléfono', 'Samsung', '07098', 'Herrero, 458745 Madrid, Madrid', 'Pantalla rota', '2024-05-21', 'enCurso', 'meee', NULL, NULL),
 (3, 9, 17, 'Mobil', 'Samsung', 'Galaxy A2', 'Herrero, 458745 Madrid, Madrid', 'Pantalla rota', '2024-05-20', 'pendiente', NULL, NULL, NULL),
 (4, 10, NULL, 'Microondas deluxe', 'Deluxe', '12', 'Herrero, 458745 Madrid, Madrid', 'El plato no gira', '2024-05-20', 'pendiente', NULL, NULL, NULL),
 (5, 9, NULL, 'Nevera', 'Xiamon', 'E45G', 'Herrero, 458745 Madrid, Madrid', 'Rotura de la puerta del congelador', '2024-05-20', 'pendiente', NULL, NULL, NULL),
@@ -335,6 +339,7 @@ CREATE TABLE `trabajador` (
 
 INSERT INTO `trabajador` (`idTrabajador`, `nombre`, `apellidos`, `calle`, `codPostal`, `ciudad`, `provincia`, `telefono`, `dni`, `email`, `fechaNacimiento`, `cargo`, `especializacion`) VALUES
 (9, 'Tobias', 'Martinez Hernandez', 'La Amargura', '25841', 'Madrid', 'Madrid', '589654521', '45125875D', 'tobias.martinez.hernandez1@resolvo.com', '1984-05-06', 'administrador', ''),
+(10, 'Belen', 'Marin Sanchez', 'Calle Bonita', '28942', 'Fuenlabrada', 'Madrid', '666778855', '8989898G', 'belen.marin.sanchez@resolvo.com', '1996-05-16', 'tecnico', ''),
 (14, 'soxcram', '96', 'tuto', '45215', 'Getafe', 'Madrid', '458512365', '45214785A', 'soxcram96@gmail.com', '1996-06-12', 'administrador', 'pc'),
 (15, 'Laura', 'Fernandez del Bosque', 'tuto', '458745', 'Madrid', 'Madrid', '58952103', '58745214P', 'laura.fernandez.del.bosque@resolvo.com', '1982-01-20', 'tecnico', 'portailes'),
 (16, 'Turen', 'Fernandez del Bosque', NULL, '5487521369', 'Loranca', 'Badajoz', '458962014', '658963214', 'turen.fernandez.del.bosque@resolvo.com', '2024-05-30', 'administrador', 'portailes'),
@@ -500,7 +505,8 @@ INSERT INTO `usuariointerno` (`idUsuarioInterno`, `idTrabajador`, `email`, `mate
 (13, 14, 'soxcram96@gmail.com', '5393d0e053f31d3d39ff8d47166054d105ac6d74a4603b7ec8453290082a7602', 0),
 (14, 15, 'laura.fernandez.del.bosque@resolvo.com', '96eaefafc3db56ca49863a066b13a6a3c8139d28b49f083673c219bbd81f294e', 0),
 (15, 16, 'turen.fernandez.del.bosque@resolvo.com', '60af431ad8883228c4b5181140db3c4cb3e7d956aa81a5fbdf3601895784089f', 1),
-(16, 17, 'javier.peleto@resolvo.com', '60af431ad8883228c4b5181140db3c4cb3e7d956aa81a5fbdf3601895784089f', 1);
+(16, 17, 'javier.peleto@resolvo.com', '60af431ad8883228c4b5181140db3c4cb3e7d956aa81a5fbdf3601895784089f', 1),
+(17, 10, 'belen.marin.sanchez@resolvo.com', '60af431ad8883228c4b5181140db3c4cb3e7d956aa81a5fbdf3601895784089f', 1);
 
 --
 -- Disparadores `usuariointerno`
@@ -714,7 +720,7 @@ ALTER TABLE `usuarioexternoeliminado`
 -- AUTO_INCREMENT de la tabla `usuariointerno`
 --
 ALTER TABLE `usuariointerno`
-  MODIFY `idUsuarioInterno` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `idUsuarioInterno` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de la tabla `usuariointernoeliminado`
