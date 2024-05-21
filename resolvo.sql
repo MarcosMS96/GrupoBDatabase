@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 21-05-2024 a las 19:43:35
+-- Tiempo de generación: 21-05-2024 a las 22:06:24
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -22,6 +22,7 @@ SET time_zone = "+00:00";
 --
 CREATE DATABASE resolvo;
 use resolvo;
+
 DELIMITER $$
 --
 -- Funciones
@@ -114,7 +115,7 @@ CREATE TABLE `clienteeliminado` (
   `contrato` enum('noTiene','limitado','ilimitado') NOT NULL DEFAULT 'noTiene',
   `numIncidencias` int(10) UNSIGNED DEFAULT NULL,
   `idClienteEliminacion` int(11) NOT NULL,
-  `fechaEliminacion` date NOT NULL DEFAULT current_timestamp(),
+  `fechaEliminacion` datetime NOT NULL DEFAULT current_timestamp(),
   `usuarioEliminacion` varchar(50) NOT NULL DEFAULT 'USER_NAME()'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -123,8 +124,8 @@ CREATE TABLE `clienteeliminado` (
 --
 
 INSERT INTO `clienteeliminado` (`idCliente`, `nombre`, `apellidos`, `calle`, `codPostal`, `ciudad`, `provincia`, `telefono`, `dni`, `email`, `contrato`, `numIncidencias`, `idClienteEliminacion`, `fechaEliminacion`, `usuarioEliminacion`) VALUES
-(11, 'Turen', 'MasterMind', 'Álcantara', '85126', 'Sevilla', 'Andalucia', '875412026', '85478514A', 'Turen@gmail.com', 'ilimitado', 1000000, 7, '2024-05-20', 'root@localhost'),
-(8, 'Laura', 'Jimenez Margó', 'Luna de Cristal', '25841', 'Madrid', 'Madrid', '547852145', '45125875D', 'lauritajiji@gmail.com', 'noTiene', NULL, 8, '2024-05-20', 'root@localhost');
+(11, 'Turen', 'MasterMind', 'Álcantara', '85126', 'Sevilla', 'Andalucia', '875412026', '85478514A', 'Turen@gmail.com', 'ilimitado', 1000000, 7, '2024-05-20 00:00:00', 'root@localhost'),
+(8, 'Laura', 'Jimenez Margó', 'Luna de Cristal', '25841', 'Madrid', 'Madrid', '547852145', '45125875D', 'lauritajiji@gmail.com', 'noTiene', NULL, 8, '2024-05-20 00:00:00', 'root@localhost');
 
 -- --------------------------------------------------------
 
@@ -141,10 +142,10 @@ CREATE TABLE `incidencia` (
   `modelo` varchar(50) NOT NULL DEFAULT '',
   `ubicacion` varchar(250) NOT NULL,
   `motivo` varchar(200) NOT NULL DEFAULT '',
-  `fechaAltaIncidencia` date DEFAULT current_timestamp(),
+  `fechaAltaIncidencia` datetime DEFAULT current_timestamp(),
   `estado` enum('pendiente','enCurso','cerrada','retenida') NOT NULL DEFAULT 'pendiente',
   `informeTecnico` varchar(200) DEFAULT NULL,
-  `fechaCierreIncidencia` date DEFAULT NULL,
+  `fechaCierreIncidencia` datetime DEFAULT NULL,
   `firmaDigital` longblob DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -153,11 +154,10 @@ CREATE TABLE `incidencia` (
 --
 
 INSERT INTO `incidencia` (`idIncidencia`, `idCliente`, `idTrabajador`, `dispositivo`, `marca`, `modelo`, `ubicacion`, `motivo`, `fechaAltaIncidencia`, `estado`, `informeTecnico`, `fechaCierreIncidencia`, `firmaDigital`) VALUES
-(1, 9, 10, 'Teléfono', 'Samsung', '07098', 'Herrero, 458745 Madrid, Madrid', 'Pantalla rota', '2024-05-21', 'enCurso', 'meee', NULL, NULL),
-(3, 9, 17, 'Mobil', 'Samsung', 'Galaxy A2', 'Herrero, 458745 Madrid, Madrid', 'Pantalla rota', '2024-05-20', 'pendiente', NULL, NULL, NULL),
-(4, 10, NULL, 'Microondas deluxe', 'Deluxe', '12', 'Herrero, 458745 Madrid, Madrid', 'El plato no gira', '2024-05-20', 'pendiente', NULL, NULL, NULL),
-(5, 9, NULL, 'Nevera', 'Xiamon', 'E45G', 'Herrero, 458745 Madrid, Madrid', 'Rotura de la puerta del congelador', '2024-05-20', 'pendiente', NULL, NULL, NULL),
-(6, 10, NULL, 'Altavoces', 'Bethesta', 'Gigabit 500', 'Herrero, 458745 Madrid, Madrid', 'Cable pelado', '0000-00-00', 'pendiente', NULL, NULL, NULL);
+(1, 9, 10, 'Teléfono', 'Samsung', '07098', 'Herrero, 458745 Madrid, Madrid', 'Pantalla rota', '2024-05-21 00:00:00', 'enCurso', 'meee', NULL, NULL),
+(4, 10, NULL, 'Microondas deluxe', 'Deluxe', '12', 'Herrero, 458745 Madrid, Madrid', 'El plato no gira', '2024-05-20 00:00:00', 'pendiente', NULL, NULL, NULL),
+(5, 9, NULL, 'Nevera', 'Xiamon', 'E45G', 'Herrero, 458745 Madrid, Madrid', 'Rotura de la puerta del congelador', '2024-05-20 00:00:00', 'pendiente', NULL, NULL, NULL),
+(6, 10, NULL, 'Altavoces', 'Bethesta', 'Gigabit 500', 'Herrero, 458745 Madrid, Madrid', 'Cable pelado', '0000-00-00 00:00:00', 'pendiente', NULL, NULL, NULL);
 
 --
 -- Disparadores `incidencia`
@@ -200,13 +200,13 @@ CREATE TABLE `incidenciaeliminada` (
   `modelo` varchar(50) NOT NULL DEFAULT '',
   `ubicación` varchar(250) NOT NULL,
   `motivo` varchar(200) NOT NULL DEFAULT '',
-  `fechaAltaIncidencia` date DEFAULT current_timestamp(),
+  `fechaAltaIncidencia` datetime DEFAULT current_timestamp(),
   `estado` enum('pendiente','enCurso','cerrada','retenida') NOT NULL DEFAULT 'pendiente',
   `informeTecnico` varchar(200) DEFAULT NULL,
-  `fechaCierreIncidencia` date DEFAULT NULL,
+  `fechaCierreIncidencia` datetime DEFAULT NULL,
   `firmaDigital` longblob DEFAULT NULL,
   `idIncidenciaEliminada` int(11) NOT NULL,
-  `fechaEliminacion` date DEFAULT current_timestamp(),
+  `fechaEliminacion` datetime DEFAULT current_timestamp(),
   `usuarioEliminacion` varchar(50) DEFAULT user()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -215,7 +215,8 @@ CREATE TABLE `incidenciaeliminada` (
 --
 
 INSERT INTO `incidenciaeliminada` (`idIncidencia`, `idCliente`, `idTrabajador`, `dispositivo`, `marca`, `modelo`, `ubicación`, `motivo`, `fechaAltaIncidencia`, `estado`, `informeTecnico`, `fechaCierreIncidencia`, `firmaDigital`, `idIncidenciaEliminada`, `fechaEliminacion`, `usuarioEliminacion`) VALUES
-(1, 9, 9, 'Microondas deluxe', 'Deluxe', '12.5 Ultra', '', 'No gira el plato', '2024-05-20', 'pendiente', NULL, NULL, NULL, 13, '2024-05-20', 'root@localhost');
+(1, 9, 9, 'Microondas deluxe', 'Deluxe', '12.5 Ultra', '', 'No gira el plato', '2024-05-20 00:00:00', 'pendiente', NULL, NULL, NULL, 13, '2024-05-20 00:00:00', 'root@localhost'),
+(3, 9, 17, 'Mobil', 'Samsung', 'Galaxy A2', 'Herrero, 458745 Madrid, Madrid', 'Pantalla rota', '2024-05-20 00:00:00', 'pendiente', NULL, NULL, NULL, 14, '2024-05-21 22:04:22', 'root@localhost');
 
 -- --------------------------------------------------------
 
@@ -250,7 +251,7 @@ CREATE TABLE `mediaeliminada` (
   `idIncidencia` int(11) DEFAULT NULL,
   `data` longblob DEFAULT NULL,
   `idMediaEliminacion` int(11) NOT NULL,
-  `fechaEliminacion` date NOT NULL DEFAULT current_timestamp(),
+  `fechaEliminacion` datetime NOT NULL DEFAULT current_timestamp(),
   `usuarioEliminacion` varchar(50) NOT NULL DEFAULT user()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -259,7 +260,7 @@ CREATE TABLE `mediaeliminada` (
 --
 
 INSERT INTO `mediaeliminada` (`idMedia`, `idIncidencia`, `data`, `idMediaEliminacion`, `fechaEliminacion`, `usuarioEliminacion`) VALUES
-(1, NULL, NULL, 1, '2024-05-20', 'root@localhost');
+(1, NULL, NULL, 1, '2024-05-20 00:00:00', 'root@localhost');
 
 -- --------------------------------------------------------
 
@@ -300,7 +301,7 @@ CREATE TABLE `presupuestoeliminado` (
   `coste` decimal(20,6) DEFAULT NULL,
   `aceptado` tinyint(1) DEFAULT NULL,
   `idPresupuestoEliminacion` int(11) NOT NULL,
-  `fechaEliminacion` date NOT NULL DEFAULT current_timestamp(),
+  `fechaEliminacion` datetime NOT NULL DEFAULT current_timestamp(),
   `usuarioEliminacion` varchar(50) NOT NULL DEFAULT user()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -309,7 +310,7 @@ CREATE TABLE `presupuestoeliminado` (
 --
 
 INSERT INTO `presupuestoeliminado` (`idPresupuesto`, `idIncidencia`, `idCliente`, `descripcion`, `coste`, `aceptado`, `idPresupuestoEliminacion`, `fechaEliminacion`, `usuarioEliminacion`) VALUES
-(0, 12, 1, 'dcsfsdf', NULL, NULL, 1, '2024-05-20', 'root@localhost');
+(0, 12, 1, 'dcsfsdf', NULL, NULL, 1, '2024-05-20 00:00:00', 'root@localhost');
 
 -- --------------------------------------------------------
 
@@ -328,7 +329,7 @@ CREATE TABLE `trabajador` (
   `telefono` varchar(9) DEFAULT NULL,
   `dni` varchar(9) DEFAULT NULL,
   `email` varchar(50) DEFAULT NULL,
-  `fechaNacimiento` date DEFAULT NULL,
+  `fechaNacimiento` datetime DEFAULT NULL,
   `cargo` enum('administrador','tecnico') DEFAULT NULL,
   `especializacion` enum('mobil','pc','portailes','electrodomesticos','otro') DEFAULT 'otro'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -338,12 +339,12 @@ CREATE TABLE `trabajador` (
 --
 
 INSERT INTO `trabajador` (`idTrabajador`, `nombre`, `apellidos`, `calle`, `codPostal`, `ciudad`, `provincia`, `telefono`, `dni`, `email`, `fechaNacimiento`, `cargo`, `especializacion`) VALUES
-(9, 'Tobias', 'Martinez Hernandez', 'La Amargura', '25841', 'Madrid', 'Madrid', '589654521', '45125875D', 'tobias.martinez.hernandez1@resolvo.com', '1984-05-06', 'administrador', ''),
-(10, 'Belen', 'Marin Sanchez', 'Calle Bonita', '28942', 'Fuenlabrada', 'Madrid', '666778855', '8989898G', 'belen.marin.sanchez@resolvo.com', '1996-05-16', 'tecnico', ''),
-(14, 'soxcram', '96', 'tuto', '45215', 'Getafe', 'Madrid', '458512365', '45214785A', 'soxcram96@gmail.com', '1996-06-12', 'administrador', 'pc'),
-(15, 'Laura', 'Fernandez del Bosque', 'tuto', '458745', 'Madrid', 'Madrid', '58952103', '58745214P', 'laura.fernandez.del.bosque@resolvo.com', '1982-01-20', 'tecnico', 'portailes'),
-(16, 'Turen', 'Fernandez del Bosque', NULL, '5487521369', 'Loranca', 'Badajoz', '458962014', '658963214', 'turen.fernandez.del.bosque@resolvo.com', '2024-05-30', 'administrador', 'portailes'),
-(17, 'Javier', 'Peleto', 'Burdel', '458745', 'Sevilla', 'Andalucia', '458745216', '45874587S', 'javier.peleto@resolvo.com', '2004-05-19', NULL, 'otro');
+(9, 'Tobias', 'Martinez Hernandez', 'La Amargura', '25841', 'Madrid', 'Madrid', '589654521', '45125875D', 'tobias.martinez.hernandez1@resolvo.com', '1984-05-06 00:00:00', 'administrador', ''),
+(10, 'Belen', 'Marin Sanchez', 'Calle Bonita', '28942', 'Fuenlabrada', 'Madrid', '666778855', '8989898G', 'belen.marin.sanchez@resolvo.com', '1996-05-16 00:00:00', 'tecnico', ''),
+(14, 'soxcram', '96', 'tuto', '45215', 'Getafe', 'Madrid', '458512365', '45214785A', 'soxcram96@gmail.com', '1996-06-12 00:00:00', 'administrador', 'pc'),
+(15, 'Laura', 'Fernandez del Bosque', 'tuto', '458745', 'Madrid', 'Madrid', '58952103', '58745214P', 'laura.fernandez.del.bosque@resolvo.com', '1982-01-20 00:00:00', 'tecnico', 'portailes'),
+(16, 'Turen', 'Fernandez del Bosque', NULL, '5487521369', 'Loranca', 'Badajoz', '458962014', '658963214', 'turen.fernandez.del.bosque@resolvo.com', '2024-05-30 00:00:00', 'administrador', 'portailes'),
+(17, 'Javier', 'Peleto', 'Burdel', '458745', 'Sevilla', 'Andalucia', '458745216', '45874587S', 'javier.peleto@resolvo.com', '2004-05-19 00:00:00', NULL, 'otro');
 
 --
 -- Disparadores `trabajador`
@@ -470,7 +471,7 @@ CREATE TABLE `usuarioexternoeliminado` (
   `email` varchar(50) DEFAULT NULL,
   `material` varchar(255) DEFAULT NULL,
   `idusuarioExternoEliminacion` int(11) NOT NULL,
-  `fechaEliminacion` date NOT NULL DEFAULT current_timestamp(),
+  `fechaEliminacion` datetime NOT NULL DEFAULT current_timestamp(),
   `usuarioEliminacion` varchar(50) NOT NULL DEFAULT user()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -479,8 +480,8 @@ CREATE TABLE `usuarioexternoeliminado` (
 --
 
 INSERT INTO `usuarioexternoeliminado` (`idUsuarioExterno`, `idCliente`, `email`, `material`, `idusuarioExternoEliminacion`, `fechaEliminacion`, `usuarioEliminacion`) VALUES
-(0, NULL, NULL, NULL, 1, '2024-05-20', 'user()'),
-(8, 8, 'lauritajiji@gmail.com', 'Cliente123', 2, '2024-05-20', 'root@localhost');
+(0, NULL, NULL, NULL, 1, '2024-05-20 00:00:00', 'user()'),
+(8, 8, 'lauritajiji@gmail.com', 'Cliente123', 2, '2024-05-20 00:00:00', 'root@localhost');
 
 -- --------------------------------------------------------
 
@@ -530,7 +531,7 @@ CREATE TABLE `usuariointernoeliminado` (
   `email` varchar(50) DEFAULT NULL,
   `material` varchar(255) DEFAULT NULL,
   `idusuarioInternoEliminacion` int(11) NOT NULL,
-  `fechaEliminacion` date NOT NULL DEFAULT current_timestamp(),
+  `fechaEliminacion` datetime NOT NULL DEFAULT current_timestamp(),
   `usuarioEliminacion` varchar(50) NOT NULL DEFAULT user()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -539,7 +540,7 @@ CREATE TABLE `usuariointernoeliminado` (
 --
 
 INSERT INTO `usuariointernoeliminado` (`idUsuarioInterno`, `idCliente`, `email`, `material`, `idusuarioInternoEliminacion`, `fechaEliminacion`, `usuarioEliminacion`) VALUES
-(6, 6, 'tobias.martinez.hernandez@resolvo.com', '1234', 1, '2024-05-20', 'root@localhost');
+(6, 6, 'tobias.martinez.hernandez@resolvo.com', '1234', 1, '2024-05-20 00:00:00', 'root@localhost');
 
 --
 -- Índices para tablas volcadas
@@ -666,7 +667,7 @@ ALTER TABLE `incidencia`
 -- AUTO_INCREMENT de la tabla `incidenciaeliminada`
 --
 ALTER TABLE `incidenciaeliminada`
-  MODIFY `idIncidenciaEliminada` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `idIncidenciaEliminada` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `media`
